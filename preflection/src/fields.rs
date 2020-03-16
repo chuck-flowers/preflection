@@ -8,14 +8,20 @@ type FieldAccessResult<T> = Result<T, FieldAccessError>;
 /// A trait that can be used to dynamically access the fields of a struct at
 /// runtime.
 pub trait HasFields {
+    /// Gets an immutable reference to a field using the name of the field.
     fn get_field_raw<'s>(&'s self, name: &str) -> FieldAccessResult<&'s dyn Any>;
+
+    /// Gets a mutable reference to a field using the name of the field.
     fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> FieldAccessResult<&'s mut dyn Any>;
 }
 
 /// A trait that provides useful extension methods that make dynamically
 /// accessing struct fields at runtime easier.
 pub trait HasFieldsExt {
+    /// Gets an immutable reference to a field using the name of the field.
     fn get_field<'s, T: 'static>(&'s self, name: &str) -> FieldAccessResult<&'s T>;
+
+    /// Gets a mutable reference to a field using the name of the field.
     fn get_field_mut<'s, T: 'static>(&'s mut self, name: &str) -> FieldAccessResult<&'s mut T>;
 }
 
