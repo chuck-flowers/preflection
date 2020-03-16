@@ -49,7 +49,7 @@ fn impl_has_fields_for_data_struct(struct_ident: &Ident, data_struct: DataStruct
                 }
             }
 
-            fn get_field_mut_raw<'s>(&'s self, name: &str) -> preflection::fields::FieldAccessResult<&'s dyn core::any::Any> {
+            fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> preflection::fields::FieldAccessResult<&'s mut dyn core::any::Any> {
                 match name {
                     #mut_match_arms
                     _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)

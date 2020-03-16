@@ -2,8 +2,9 @@ mod errors;
 
 pub use self::errors::FieldAccessError;
 use core::any::Any;
+pub use preflection_macros::HasFields;
 
-type FieldAccessResult<T> = Result<T, FieldAccessError>;
+pub type FieldAccessResult<T> = Result<T, FieldAccessError>;
 
 /// A trait that can be used to dynamically access the fields of a struct at
 /// runtime.
