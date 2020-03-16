@@ -17,7 +17,7 @@ pub trait HasFields {
 
 /// A trait that provides useful extension methods that make dynamically
 /// accessing struct fields at runtime easier.
-pub trait HasFieldsExt {
+pub trait HasFieldsExt: HasFields {
     /// Gets an immutable reference to a field using the name of the field.
     fn get_field<'s, T: 'static>(&'s self, name: &str) -> FieldAccessResult<&'s T>;
 
