@@ -92,13 +92,10 @@ mod tests {
     use syn::parse_quote;
     use syn::punctuated::Punctuated;
     use syn::token::Brace;
-    use syn::Data;
     use syn::DataStruct;
-    use syn::DeriveInput;
     use syn::Field;
     use syn::Fields;
     use syn::FieldsNamed;
-    use syn::Generics;
 
     #[test]
     fn impl_has_fields_for_data_struct_test() {
@@ -114,7 +111,7 @@ mod tests {
                     }
                 }
 
-                fn get_field_mut_raw<'s>(&'s self, name: &str) -> preflection::fields::FieldAccessResult<&'s dyn core::any::Any> {
+                fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> preflection::fields::FieldAccessResult<&'s mut dyn core::any::Any> {
                     match name {
                         "id" => core::result::Result::Ok(&mut self.id),
                         _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
@@ -147,16 +144,6 @@ mod tests {
         };
 
         assert_eq!(actual.to_string(), expected.to_string())
-    }
-
-    fn make_derive_input() -> DeriveInput {
-        DeriveInput {
-            attrs: vec![],
-            data: Data::Struct(make_data_struct()),
-            generics: Generics::default(),
-            ident: parse_quote!(User),
-            vis: parse_quote!(pub),
-        }
     }
 
     fn make_data_struct() -> DataStruct {
