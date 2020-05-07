@@ -4,6 +4,10 @@ pub use self::errors::FieldAccessError;
 use core::any::Any;
 pub use preflection_macros::HasFields;
 
+#[cfg(feature = "has-field")]
+pub use preflection_macros::HasField;
+
+/// The result of accessing a field dynamically
 pub type FieldAccessResult<T> = Result<T, FieldAccessError>;
 
 /// A trait that can be used to dynamically access the fields of a struct at
@@ -14,6 +18,19 @@ pub trait HasFields {
 
     /// Gets a mutable reference to a field using the name of the field.
     fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> FieldAccessResult<&'s mut dyn Any>;
+}
+
+/// Represents a struct that has a field with a specific name and type.
+#[cfg(feature = "has-field")]
+pub trait HasField<T, const NAME: &'static str> {
+    /// Gets an immutable reference to the field.
+    fn get_field<'a>(&'a self) -> &'a T;
+
+    /// Gets a mutable reference to the field.
+    fn get_field_mut<'a>(&'a mut self) -> &'a mut T;
+
+    /// Transforms the struct into an owned value of the field.
+    fn into_field(self) -> T;
 }
 
 /// A trait that provides useful extension methods that make dynamically
@@ -37,39 +54,5 @@ impl<T: HasFields> HasFieldsExt for T {
         self.get_field_mut_raw(name)?
             .downcast_mut::<U>()
             .ok_or(FieldAccessError::InvalidType)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-
-    use super::*;
-
-    struct User {
-        id: u32,
-    }
-
-    impl HasFields for User {
-        fn get_field_raw<'s>(&'s self, name: &str) -> FieldAccessResult<&'s dyn Any> {
-            match name {
-                "id" => Ok(&self.id),
-                _ => Err(FieldAccessError::MissingField),
-            }
-        }
-        fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> FieldAccessResult<&'s mut dyn Any> {
-            match name {
-                "id" => Ok(&mut self.id),
-                _ => Err(FieldAccessError::MissingField),
-            }
-        }
-    }
-
-    #[test]
-    fn get_field_test() {
-        let user = User { id: 1 };
-
-        let id = user.get_field::<u32>("id").unwrap();
-
-        assert_eq!(id, &user.id);
     }
 }

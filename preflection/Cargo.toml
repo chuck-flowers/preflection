@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies]
 preflection-macros = { path = "../preflection-macros" }
+
+[features]
+has-field = ["preflection-macros/has-field"]
