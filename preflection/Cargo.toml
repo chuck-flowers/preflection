@@ -11,3 +11,10 @@ preflection-macros = { path = "../preflection-macros" }
 
 [features]
 has-field = ["preflection-macros/has-field"]
+
+[[example]]
+name = "simple_dynamic_example"
+
+[[example]]
+name = "simple_static_example"
+required-features = ["has-field"]
