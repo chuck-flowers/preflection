@@ -24,12 +24,12 @@ fn field_impl(ty_name: &Ident, field: &Field) -> TokenStream2 {
     let field_ident = &field.ident.as_ref().unwrap();
     let field_name = LitStr::new(&field_ident.to_string(), field_ident.span());
     quote! {
-        impl preflection::HasField<#field_ty, #field_name> for #ty_name {
+        impl preflection::fields::HasField<#field_ty, #field_name> for #ty_name {
             fn get_field<'a>(&'a self) -> &'a #field_ty {
                 &self.#field_ident
             }
 
-            fn get_field_mut<'a>(&'a self) -> &'a mut #field_ty {
+            fn get_field_mut<'a>(&'a mut self) -> &'a mut #field_ty {
                 &mut self.#field_ident
             }
 
