@@ -18,3 +18,7 @@ name = "simple_dynamic_example"
 [[example]]
 name = "simple_static_example"
 required-features = ["has-field"]
+
+[[example]]
+name = "ignore_static_field"
+required-features = ["has-field"]

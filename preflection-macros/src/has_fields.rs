@@ -1,60 +1,70 @@
+use crate::attr_utils::get_preflection_attr;
+use crate::errors::GetHelperAttrError;
+use crate::errors::PreflectionMacroError;
 use proc_macro2::Span;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use proc_macro2::TokenStream;
+use quote::ToTokens;
+use syn::parse::Error as ParseError;
+use syn::parse_quote;
+use syn::punctuated::Punctuated;
+use syn::Arm;
 use syn::Data;
 use syn::DataStruct;
 use syn::DeriveInput;
+use syn::ExprMatch;
 use syn::Field;
 use syn::Fields;
 use syn::Ident;
+use syn::ItemImpl;
 use syn::LitStr;
 use syn::Token;
 
-pub fn has_fields_derive_impl(derive_input: &DeriveInput) -> TokenStream2 {
+pub fn has_fields_derive_impl(
+    derive_input: &DeriveInput,
+) -> Result<TokenStream, PreflectionMacroError> {
     if let Data::Struct(data_struct) = &derive_input.data {
         let struct_ident = &derive_input.ident;
+
         impl_has_fields_for_data_struct(struct_ident, data_struct)
+            .map(ToTokens::into_token_stream)
+            .map_err(PreflectionMacroError::from)
     } else {
         panic!("HasFields can only be derived for structs")
     }
 }
 
-fn impl_has_fields_for_data_struct(struct_ident: &Ident, data_struct: &DataStruct) -> TokenStream2 {
+fn impl_has_fields_for_data_struct(
+    struct_ident: &Ident,
+    data_struct: &DataStruct,
+) -> Result<ItemImpl, GetHelperAttrError> {
+    let empty_punct = Punctuated::default();
     let fields = match &data_struct.fields {
-        Fields::Named(fields_named) => Some(&fields_named.named),
-        Fields::Unnamed(fields_unnamed) => Some(&fields_unnamed.unnamed),
-        Fields::Unit => None,
+        Fields::Named(fields_named) => &fields_named.named,
+        Fields::Unnamed(fields_unnamed) => &fields_unnamed.unnamed,
+        Fields::Unit => &empty_punct,
     };
+
+    let reg_match = make_match(fields.iter(), false)?;
+    let mut_match = make_match(fields.iter(), true)?;
 
     // Builds the match arms for the immutable and mutable version of the get_field method.
-    let (match_arms, mut_match_arms) = if let Some(fields) = fields {
-        let match_arms = make_match_arms(fields.iter(), false);
-        let mut_match_arms = make_match_arms(fields.iter(), true);
-        (match_arms, mut_match_arms)
-    } else {
-        (TokenStream2::default(), TokenStream2::default())
-    };
-
-    quote! {
+    Ok(parse_quote! {
         impl preflection::fields::HasFields for #struct_ident {
             fn get_field_raw<'s>(&'s self, name: &str) -> preflection::fields::FieldAccessResult<&'s dyn core::any::Any> {
-                match name {
-                    #match_arms
-                    _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
-                }
+                #reg_match
             }
 
             fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> preflection::fields::FieldAccessResult<&'s mut dyn core::any::Any> {
-                match name {
-                    #mut_match_arms
-                    _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
-                }
+                #mut_match
             }
         }
-    }
+    })
 }
 
-fn make_match_arms<'a>(fields: impl Iterator<Item = &'a Field>, is_mut: bool) -> TokenStream2 {
+fn make_match<'a>(
+    fields: impl Iterator<Item = &'a Field>,
+    is_mut: bool,
+) -> Result<ExprMatch, ParseError> {
     // Build a mut token if needed
     let mut_token: Option<Token![mut]> = if is_mut {
         Some(Token!(mut)(Span::call_site()))
@@ -63,19 +73,34 @@ fn make_match_arms<'a>(fields: impl Iterator<Item = &'a Field>, is_mut: bool) ->
     };
 
     // Build a token stream for each match arm
-    let match_arms = fields.map(|field| make_match_arm(field, mut_token));
+    let match_arms = fields
+        .map(|field| make_match_arm(field, mut_token))
+        .filter_map(|res| res.ok().flatten());
 
-    // Combine the token streams into a single token stream
-    quote! {
-        #(#match_arms,)*
-    }
+    let match_statement = parse_quote! {
+        match name {
+            #(#match_arms,)*
+            _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
+        }
+    };
+
+    Ok(match_statement)
 }
 
-fn make_match_arm(field: &Field, mut_token: Option<Token![mut]>) -> TokenStream2 {
-    let field_ident = field.ident.as_ref().unwrap();
-    let field_name_lit = LitStr::new(&field_ident.to_string(), field_ident.span());
-
-    quote! { #field_name_lit => core::result::Result::Ok(& #mut_token self.#field_ident) }
+fn make_match_arm(
+    field: &Field,
+    mut_token: Option<Token![mut]>,
+) -> Result<Option<Arm>, GetHelperAttrError> {
+    get_preflection_attr(field).map(|attr| {
+        if attr.ignore() {
+            None
+        } else {
+            let field_ident = field.ident.as_ref().unwrap();
+            let field_name_lit = LitStr::new(&field_ident.to_string(), field_ident.span());
+            let arm: Arm = parse_quote! { #field_name_lit => core::result::Result::Ok(& #mut_token self.#field_ident) };
+            Some(arm)
+        }
+    })
 }
 
 #[cfg(test)]
@@ -83,10 +108,10 @@ mod tests {
 
     use super::*;
     use proc_macro2::Span;
-    use quote::quote;
     use syn::parse_quote;
     use syn::punctuated::Punctuated;
     use syn::token::Brace;
+    use syn::Arm;
     use syn::DataStruct;
     use syn::Field;
     use syn::Fields;
@@ -96,8 +121,8 @@ mod tests {
     fn impl_has_fields_for_data_struct_test() {
         let struct_ident = Ident::new("User", Span::call_site());
         let data_struct = make_data_struct();
-        let actual = impl_has_fields_for_data_struct(&struct_ident, &data_struct);
-        let expected = quote! {
+        let actual = impl_has_fields_for_data_struct(&struct_ident, &data_struct).unwrap();
+        let expected: ItemImpl = parse_quote! {
             impl preflection::fields::HasFields for User {
                 fn get_field_raw<'s>(&'s self, name: &str) -> preflection::fields::FieldAccessResult<&'s dyn core::any::Any> {
                     match name {
@@ -115,30 +140,33 @@ mod tests {
             }
         };
 
-        assert_eq!(actual.to_string(), expected.to_string())
+        assert_eq!(actual, expected)
     }
 
     #[test]
-    fn make_match_arms_test() {
+    fn make_match_test() {
         let fields = make_named_fields();
-        let actual = make_match_arms(fields.iter(), false);
-        let expected = quote! {
-            "id" => core::result::Result::Ok(&self.id),
+        let actual = make_match(fields.iter(), false).unwrap();
+        let expected: ExprMatch = parse_quote! {
+            match name {
+                "id" => core::result::Result::Ok(&self.id),
+                _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
+            }
         };
 
-        assert_eq!(actual.to_string(), expected.to_string());
+        assert_eq!(actual, expected)
     }
 
     #[test]
     fn make_match_arm_test() {
         let field = make_field();
 
-        let actual = make_match_arm(&field, None);
-        let expected = quote! {
+        let actual = make_match_arm(&field, None).unwrap().unwrap();
+        let expected: Arm = parse_quote! {
             "id" => core::result::Result::Ok(&self.id)
         };
 
-        assert_eq!(actual.to_string(), expected.to_string())
+        assert_eq!(actual, expected)
     }
 
     fn make_data_struct() -> DataStruct {
@@ -160,8 +188,8 @@ mod tests {
     fn make_field() -> Field {
         Field {
             attrs: vec![],
-            colon_token: Some(parse_quote!(:)),
-            ident: parse_quote!(id),
+            colon_token: Some(syn::token::Colon::default()),
+            ident: Some(Ident::new("id", Span::call_site())),
             ty: parse_quote!(u32),
             vis: parse_quote!(pub),
         }

@@ -3,7 +3,7 @@ use core::fmt::Formatter;
 use core::fmt::Result as FmtResult;
 
 /// An error that occurred while accessing a field through the preflection API.
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum FieldAccessError {
     MissingField,
     InvalidType,
