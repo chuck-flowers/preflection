@@ -7,7 +7,6 @@ mod has_field;
 mod has_fields;
 
 use proc_macro::TokenStream;
-use quote::ToTokens;
 use syn::parse_macro_input;
 use syn::DeriveInput;
 
@@ -25,7 +24,7 @@ pub fn has_fields_derive(input_stream: TokenStream) -> TokenStream {
 pub fn has_field_derive(input_stream: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input_stream as DeriveInput);
     match has_field::has_field_derive_impl(&derive_input) {
-        Ok(output) => output.into_token_stream().into(),
+        Ok(output) => output.into(),
         Err(err) => err.into(),
     }
 }
