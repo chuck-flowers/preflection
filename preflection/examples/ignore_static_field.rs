@@ -3,7 +3,7 @@ use preflection::fields::HasField;
 #[derive(HasField)]
 struct User {
     id: u32,
-    #[preflection(ignore)]
+    #[preflection(ignore = true)]
     #[allow(dead_code)]
     name: String,
 }

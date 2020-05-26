@@ -1,16 +1,10 @@
 use crate::errors::GetHelperAttrError;
+use attribution::attr_args;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenTree;
-use syn::parse::Error as ParseError;
-use syn::parse::Parse;
-use syn::parse::ParseStream;
-use syn::parse::Result as ParseResult;
-use syn::punctuated::Punctuated;
 use syn::Attribute;
 use syn::Field;
-use syn::Meta;
-use syn::Token;
 
 pub fn get_preflection_attr(field: &Field) -> Result<HelperAttr, GetHelperAttrError> {
     // All attributes on the field
@@ -62,6 +56,7 @@ fn is_preflection_attr(attr: &Attribute) -> bool {
         .unwrap_or(false)
 }
 
+#[attr_args]
 #[derive(Default)]
 pub struct HelperAttr {
     ignore: bool,
@@ -70,49 +65,5 @@ pub struct HelperAttr {
 impl HelperAttr {
     pub const fn ignore(&self) -> bool {
         self.ignore
-    }
-}
-
-impl Parse for HelperAttr {
-    fn parse(input: ParseStream) -> ParseResult<Self> {
-        let mut attr = HelperAttr::default();
-        if input.is_empty() {
-            return Ok(attr);
-        }
-
-        let meta_list = Punctuated::<Meta, Token!(,)>::parse_separated_nonempty(input)?;
-        for meta in meta_list {
-            match meta {
-                Meta::Path(path) => {
-                    let ident = path.get_ident();
-                    if ident.map(|i| i == "ignore").unwrap_or(false) {
-                        attr.ignore = true;
-                    } else {
-                        return Err(ParseError::new_spanned(path, "Unexpected attribute field."));
-                    }
-                }
-                Meta::NameValue(nv) => {
-                    let ident = nv.path.get_ident();
-                    if ident.map(|i| i == "ignore").unwrap_or(false) {
-                        if let syn::Lit::Bool(b) = nv.lit {
-                            attr.ignore = b.value;
-                        } else {
-                            return Err(ParseError::new_spanned(
-                                nv,
-                                "The value of 'ignore' should be a bool.",
-                            ));
-                        }
-                    }
-                }
-                other => {
-                    return Err(ParseError::new_spanned(
-                        other,
-                        "Unrecognized attribute data.",
-                    ));
-                }
-            }
-        }
-
-        Ok(attr)
     }
 }

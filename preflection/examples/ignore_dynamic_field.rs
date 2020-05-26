@@ -7,7 +7,7 @@ use preflection::fields::HasFieldsExt;
 struct User {
     id: u32,
     #[allow(dead_code)]
-    #[preflection(ignore)]
+    #[preflection(ignore = true)]
     name: String,
 }
 
