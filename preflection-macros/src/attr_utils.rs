@@ -57,13 +57,23 @@ fn is_preflection_attr(attr: &Attribute) -> bool {
 }
 
 #[attr_args]
-#[derive(Default)]
-pub struct HelperAttr {
-    ignore: bool,
+pub enum HelperAttr {
+    Ignore { ignore: bool },
+    Alias { alias: Vec<String> },
+    Default,
 }
 
 impl HelperAttr {
-    pub const fn ignore(&self) -> bool {
-        self.ignore
+    pub fn ignore(&self) -> bool {
+        match self {
+            HelperAttr::Ignore { ignore } => *ignore,
+            _ => false,
+        }
+    }
+}
+
+impl Default for HelperAttr {
+    fn default() -> Self {
+        Self::Default
     }
 }
