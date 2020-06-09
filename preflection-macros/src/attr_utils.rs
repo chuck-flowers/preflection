@@ -2,30 +2,21 @@ use crate::errors::GetHelperAttrError;
 use attribution::attr_args;
 use proc_macro2::Ident;
 use proc_macro2::Span;
-use proc_macro2::TokenTree;
 use syn::Attribute;
 use syn::Field;
 
 pub fn get_preflection_attr(field: &Field) -> Result<HelperAttr, GetHelperAttrError> {
-    // All attributes on the field
-    let attrs = field.attrs.iter();
+    // Parse all the preflection helper attributes
+    let mut helper_attrs = field
+        .attrs
+        .iter()
+        .filter(|attr| is_preflection_attr(attr))
+        .map(|attr| attr.tokens.clone())
+        .map(syn::parse2::<HelperAttr>)
+        .collect::<Result<Vec<_>, _>>()?;
 
-    // All preflection attributes on the field
-    let preflection_attrs = attrs.filter(|attr| is_preflection_attr(attr));
-
-    // The content of the preflection attributes
-    // Example: #[preflection(ignore = true)] -> preflection(ignore = true)
-    let mut preflection_attr_bodies = preflection_attrs.map(|attr| attr.tokens.clone());
-
-    // The body content of the preflection attributes
-    // Example: #[preflection(ignore = true)] -> (ignore = true)
-    let mut first_attr_body = preflection_attr_bodies
-        .next()
-        .unwrap_or_default()
-        .into_iter();
-
-    // Ensure that there is not a second preflection attribute declared
-    let second_preflection_attr_exists = preflection_attr_bodies.next().is_some();
+    // Ensure that there are not multiple helper attributes defined
+    let second_preflection_attr_exists = helper_attrs.len() > 1;
     if second_preflection_attr_exists {
         let span = field
             .ident
@@ -35,18 +26,7 @@ pub fn get_preflection_attr(field: &Field) -> Result<HelperAttr, GetHelperAttrEr
         return Err(GetHelperAttrError::MultipleAttributes { span });
     }
 
-    match first_attr_body.next() {
-        Some(TokenTree::Group(group)) => {
-            // Ensure there is not additional data after the first group
-            if let Some(extra) = first_attr_body.next() {
-                Err(GetHelperAttrError::ExtraTokens { span: extra.span() })
-            } else {
-                Ok(syn::parse2(group.stream())?)
-            }
-        }
-        Some(other) => Err(GetHelperAttrError::MissingGroup { span: other.span() }),
-        None => Ok(HelperAttr::default()),
-    }
+    Ok(helper_attrs.pop().unwrap_or_default())
 }
 
 fn is_preflection_attr(attr: &Attribute) -> bool {
