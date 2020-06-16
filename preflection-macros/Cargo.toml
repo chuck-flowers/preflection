@@ -9,6 +9,7 @@ edition = "2018"
 proc-macro = true
 
 [dependencies]
+attribution = { git = "https://github.com/chuck-flowers/attribution" }
 proc-macro2 = "^1.0.9"
 quote = "^1.0.3"
 syn = { version = "^1.0.16", features = ["full"] }
