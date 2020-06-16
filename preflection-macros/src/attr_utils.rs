@@ -37,6 +37,7 @@ fn is_preflection_attr(attr: &Attribute) -> bool {
 }
 
 #[attr_args]
+#[derive(Debug)]
 pub enum HelperAttr {
     Ignore { ignore: bool },
     Alias { alias: Vec<String> },
