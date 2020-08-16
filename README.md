@@ -1,6 +1,6 @@
-# Preflection
+# Preflect
 
-Preflection is an experimental Rust library used to simulate simple runtime 
+Preflect is an experimental Rust library used to simulate simple runtime 
 reflection. This feature is typically only available in languages that include 
 a heavier runtime such as C# or Java, but with Rust's type system, some simple 
 use cases of reflection are possible.

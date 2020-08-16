@@ -2,7 +2,7 @@ use core::fmt::Display;
 use core::fmt::Formatter;
 use core::fmt::Result as FmtResult;
 
-/// An error that occurred while accessing a field through the preflection API.
+/// An error that occurred while accessing a field through the preflect API.
 #[derive(Debug, Eq, PartialEq)]
 pub enum FieldAccessError {
     MissingField,

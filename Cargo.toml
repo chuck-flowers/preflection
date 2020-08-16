@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    'preflection',
-    'preflection-macros'
+    'preflect',
+    'preflect-macros'
 ]

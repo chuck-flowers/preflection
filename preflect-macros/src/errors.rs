@@ -8,18 +8,18 @@ use syn::parse::Error as ParseError;
 use syn::Error as SynError;
 
 #[derive(Debug)]
-pub struct PreflectionMacroError {
+pub struct PreflectMacroError {
     message: String,
     span: Span,
 }
 
-impl PreflectionMacroError {
+impl PreflectMacroError {
     pub fn new(message: String, span: Span) -> Self {
         Self { message, span }
     }
 }
 
-impl From<GetHelperAttrError> for PreflectionMacroError {
+impl From<GetHelperAttrError> for PreflectMacroError {
     fn from(src: GetHelperAttrError) -> Self {
         let message = src.to_string();
         let span = match src {
@@ -29,17 +29,17 @@ impl From<GetHelperAttrError> for PreflectionMacroError {
             GetHelperAttrError::ParseError { parse_error } => parse_error.span(),
         };
 
-        PreflectionMacroError::new(message, span)
+        PreflectMacroError::new(message, span)
     }
 }
 
-impl Into<TokenStream> for PreflectionMacroError {
+impl Into<TokenStream> for PreflectMacroError {
     fn into(self) -> TokenStream {
         Into::<TokenStream2>::into(self).into()
     }
 }
 
-impl Into<TokenStream2> for PreflectionMacroError {
+impl Into<TokenStream2> for PreflectMacroError {
     fn into(self) -> TokenStream2 {
         SynError::new(self.span, self.message).to_compile_error()
     }
@@ -58,7 +58,7 @@ impl Display for GetHelperAttrError {
         match self {
             GetHelperAttrError::MultipleAttributes { .. } => write!(
                 f,
-                "Only one preflection attribute can be applied to each field."
+                "Only one preflect attribute can be applied to each field."
             ),
             GetHelperAttrError::ParseError { parse_error } => write!(
                 f,
@@ -68,7 +68,7 @@ impl Display for GetHelperAttrError {
             GetHelperAttrError::ExtraTokens { .. } => write!(f, "Found extraneous tokens."),
             GetHelperAttrError::MissingGroup { .. } => write!(
                 f,
-                "Expected the input to be grouped (e.g. #[preflection(ignore)]"
+                "Expected the input to be grouped (e.g. #[preflect(ignore)]"
             ),
         }
     }

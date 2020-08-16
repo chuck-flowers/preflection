@@ -1,13 +1,13 @@
-use preflection::fields::FieldAccessError;
-use preflection::fields::FieldAccessResult;
-use preflection::fields::HasFields;
-use preflection::fields::HasFieldsExt;
+use preflect::fields::FieldAccessError;
+use preflect::fields::FieldAccessResult;
+use preflect::fields::HasFields;
+use preflect::fields::HasFieldsExt;
 
 #[derive(HasFields)]
 struct User {
     id: u32,
     #[allow(dead_code)]
-    #[preflection(ignore)]
+    #[preflect(ignore)]
     name: String,
 }
 

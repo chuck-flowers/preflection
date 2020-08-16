@@ -1,6 +1,6 @@
-use crate::attr_utils::get_preflection_attr;
+use crate::attr_utils::get_preflect_attr;
 use crate::errors::GetHelperAttrError;
-use crate::errors::PreflectionMacroError;
+use crate::errors::PreflectMacroError;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
@@ -21,13 +21,13 @@ use syn::Token;
 
 pub fn has_fields_derive_impl(
     derive_input: &DeriveInput,
-) -> Result<TokenStream, PreflectionMacroError> {
+) -> Result<TokenStream, PreflectMacroError> {
     if let Data::Struct(data_struct) = &derive_input.data {
         let struct_ident = &derive_input.ident;
 
         impl_has_fields_for_data_struct(struct_ident, data_struct)
             .map(ToTokens::into_token_stream)
-            .map_err(PreflectionMacroError::from)
+            .map_err(PreflectMacroError::from)
     } else {
         panic!("HasFields can only be derived for structs")
     }
@@ -49,12 +49,12 @@ fn impl_has_fields_for_data_struct(
 
     // Builds the match arms for the immutable and mutable version of the get_field method.
     Ok(parse_quote! {
-        impl preflection::fields::HasFields for #struct_ident {
-            fn get_field_raw<'s>(&'s self, name: &str) -> preflection::fields::FieldAccessResult<&'s dyn core::any::Any> {
+        impl preflect::fields::HasFields for #struct_ident {
+            fn get_field_raw<'s>(&'s self, name: &str) -> preflect::fields::FieldAccessResult<&'s dyn core::any::Any> {
                 #reg_match
             }
 
-            fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> preflection::fields::FieldAccessResult<&'s mut dyn core::any::Any> {
+            fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> preflect::fields::FieldAccessResult<&'s mut dyn core::any::Any> {
                 #mut_match
             }
         }
@@ -80,7 +80,7 @@ fn make_match<'a>(
     let match_statement = parse_quote! {
         match name {
             #(#match_arms,)*
-            _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
+            _ => core::result::Result::Err(preflect::fields::FieldAccessError::MissingField)
         }
     };
 
@@ -91,7 +91,7 @@ fn make_match_arm(
     field: &Field,
     mut_token: Option<Token![mut]>,
 ) -> Result<Option<Arm>, GetHelperAttrError> {
-    get_preflection_attr(field).map(|attr| {
+    get_preflect_attr(field).map(|attr| {
         if attr.ignore() {
             None
         } else {
@@ -123,18 +123,18 @@ mod tests {
         let data_struct = make_data_struct();
         let actual = impl_has_fields_for_data_struct(&struct_ident, &data_struct).unwrap();
         let expected: ItemImpl = parse_quote! {
-            impl preflection::fields::HasFields for User {
-                fn get_field_raw<'s>(&'s self, name: &str) -> preflection::fields::FieldAccessResult<&'s dyn core::any::Any> {
+            impl preflect::fields::HasFields for User {
+                fn get_field_raw<'s>(&'s self, name: &str) -> preflect::fields::FieldAccessResult<&'s dyn core::any::Any> {
                     match name {
                         "id" => core::result::Result::Ok(&self.id),
-                        _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
+                        _ => core::result::Result::Err(preflect::fields::FieldAccessError::MissingField)
                     }
                 }
 
-                fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> preflection::fields::FieldAccessResult<&'s mut dyn core::any::Any> {
+                fn get_field_mut_raw<'s>(&'s mut self, name: &str) -> preflect::fields::FieldAccessResult<&'s mut dyn core::any::Any> {
                     match name {
                         "id" => core::result::Result::Ok(&mut self.id),
-                        _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
+                        _ => core::result::Result::Err(preflect::fields::FieldAccessError::MissingField)
                     }
                 }
             }
@@ -150,7 +150,7 @@ mod tests {
         let expected: ExprMatch = parse_quote! {
             match name {
                 "id" => core::result::Result::Ok(&self.id),
-                _ => core::result::Result::Err(preflection::fields::FieldAccessError::MissingField)
+                _ => core::result::Result::Err(preflect::fields::FieldAccessError::MissingField)
             }
         };
 

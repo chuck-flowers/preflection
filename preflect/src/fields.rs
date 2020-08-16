@@ -2,10 +2,10 @@ mod errors;
 
 pub use self::errors::FieldAccessError;
 use core::any::Any;
-pub use preflection_macros::HasFields;
+pub use preflect_macros::HasFields;
 
 #[cfg(feature = "has-field")]
-pub use preflection_macros::HasField;
+pub use preflect_macros::HasField;
 
 /// The result of accessing a field dynamically
 pub type FieldAccessResult<T> = Result<T, FieldAccessError>;

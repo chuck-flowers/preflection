@@ -1,9 +1,9 @@
-use preflection::fields::HasField;
+use preflect::fields::HasField;
 
 #[derive(HasField)]
 struct User {
     id: u32,
-    #[preflection(ignore = true)]
+    #[preflect(ignore = true)]
     #[allow(dead_code)]
     name: String,
 }

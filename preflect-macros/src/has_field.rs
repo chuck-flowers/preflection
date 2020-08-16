@@ -1,5 +1,5 @@
-use crate::attr_utils::get_preflection_attr;
-use crate::errors::PreflectionMacroError;
+use crate::attr_utils::get_preflect_attr;
+use crate::errors::PreflectMacroError;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::parse_quote;
@@ -12,12 +12,12 @@ use syn::LitStr;
 
 pub fn has_field_derive_impl(
     derive_input: &DeriveInput,
-) -> Result<TokenStream, PreflectionMacroError> {
+) -> Result<TokenStream, PreflectMacroError> {
     let ty_name = &derive_input.ident;
     if let Data::Struct(data_struct) = &derive_input.data {
         let mut token_stream = TokenStream::new();
         for field in data_struct.fields.iter() {
-            let attr = get_preflection_attr(field)?;
+            let attr = get_preflect_attr(field)?;
             if !attr.ignore() {
                 token_stream.extend(field_impl(ty_name, field).into_token_stream());
             }
@@ -27,7 +27,7 @@ pub fn has_field_derive_impl(
     } else {
         let message = "".into();
         let span = ty_name.span();
-        Err(PreflectionMacroError::new(message, span))
+        Err(PreflectMacroError::new(message, span))
     }
 }
 
@@ -36,7 +36,7 @@ fn field_impl(ty_name: &Ident, field: &Field) -> ItemImpl {
     let field_ident = &field.ident.as_ref().unwrap();
     let field_name = LitStr::new(&field_ident.to_string(), field_ident.span());
     parse_quote! {
-        impl preflection::fields::HasField<#field_ty, #field_name> for #ty_name {
+        impl preflect::fields::HasField<#field_ty, #field_name> for #ty_name {
             fn get_field<'a>(&'a self) -> &'a #field_ty {
                 &self.#field_ident
             }
@@ -64,7 +64,7 @@ mod tests {
 
         let actual = field_impl(&ty_name, &field);
         let expected = parse_quote! {
-            impl preflection::fields::HasField<u32, "id"> for User {
+            impl preflect::fields::HasField<u32, "id"> for User {
                 fn get_field<'a>(&'a self) -> &'a u32 {
                     &self.id
                 }

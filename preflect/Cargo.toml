@@ -1,5 +1,5 @@
 [package]
-name = "preflection"
+name = "preflect"
 version = "0.1.0"
 authors = ["Timothy Flowers <t_chuck_flowers@yahoo.com>"]
 edition = "2018"
@@ -7,10 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-preflection-macros = { path = "../preflection-macros" }
+preflect-macros = { path = "../preflect-macros" }
 
 [features]
-has-field = ["preflection-macros/has-field"]
+has-field = ["preflect-macros/has-field"]
 
 [[example]]
 name = "simple_dynamic_example"
