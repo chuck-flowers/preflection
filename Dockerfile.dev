@@ -1,0 +1,7 @@
+FROM rust
+WORKDIR /preflect
+
+# Install nightly so all features can be developed.
+RUN rustup toolchain install nightly --component rustfmt,clippy
+RUN rustup default nightly
+

@@ -1,0 +1,9 @@
+{
+    "context": "..",
+    "dockerFile": "../Dockerfile.dev",
+    "extensions": [
+        "matklad.rust-analyzer"
+    ],
+    "workspaceFolder": "/preflect",
+    "workspaceMount": "type=bind,src=${localWorkspaceFolder},dst=/preflect"
+}
