@@ -2,6 +2,8 @@
     "context": "..",
     "dockerFile": "../Dockerfile.dev",
     "extensions": [
+        "belfz.search-crates-io",
+        "bungcip.better-toml",
         "matklad.rust-analyzer"
     ],
     "workspaceFolder": "/preflect",
