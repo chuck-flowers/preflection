@@ -24,10 +24,10 @@ pub trait HasFields {
 #[cfg(feature = "has-field")]
 pub trait HasField<T, const NAME: &'static str> {
     /// Gets an immutable reference to the field.
-    fn get_field<'a>(&'a self) -> &'a T;
+    fn get_field(&self) -> &T;
 
     /// Gets a mutable reference to the field.
-    fn get_field_mut<'a>(&'a mut self) -> &'a mut T;
+    fn get_field_mut(&mut self) -> &mut T;
 
     /// Transforms the struct into an owned value of the field.
     fn into_field(self) -> T;

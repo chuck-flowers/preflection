@@ -23,8 +23,6 @@ impl From<GetHelperAttrError> for PreflectMacroError {
     fn from(src: GetHelperAttrError) -> Self {
         let message = src.to_string();
         let span = match src {
-            GetHelperAttrError::ExtraTokens { span } => span,
-            GetHelperAttrError::MissingGroup { span } => span,
             GetHelperAttrError::MultipleAttributes { span } => span,
             GetHelperAttrError::ParseError { parse_error } => parse_error.span(),
         };
@@ -49,8 +47,6 @@ impl Into<TokenStream2> for PreflectMacroError {
 pub enum GetHelperAttrError {
     MultipleAttributes { span: Span },
     ParseError { parse_error: syn::parse::Error },
-    ExtraTokens { span: Span },
-    MissingGroup { span: Span },
 }
 
 impl Display for GetHelperAttrError {
@@ -64,11 +60,6 @@ impl Display for GetHelperAttrError {
                 f,
                 "There was a problem parsing the attribute body: {}",
                 parse_error
-            ),
-            GetHelperAttrError::ExtraTokens { .. } => write!(f, "Found extraneous tokens."),
-            GetHelperAttrError::MissingGroup { .. } => write!(
-                f,
-                "Expected the input to be grouped (e.g. #[preflect(ignore)]"
             ),
         }
     }

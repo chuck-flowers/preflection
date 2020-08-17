@@ -22,7 +22,7 @@ pub fn get_preflect_attr(field: &Field) -> Result<HelperAttr, GetHelperAttrError
             .ident
             .as_ref()
             .map(Ident::span)
-            .unwrap_or_else(|| Span::call_site());
+            .unwrap_or_else(Span::call_site);
         return Err(GetHelperAttrError::MultipleAttributes { span });
     }
 
