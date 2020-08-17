@@ -1,5 +1,5 @@
 use crate::errors::GetHelperAttrError;
-use attribution::attr_args;
+use attribution::AttrArgs;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use syn::Attribute;
@@ -36,8 +36,7 @@ fn is_preflect_attr(attr: &Attribute) -> bool {
         .unwrap_or(false)
 }
 
-#[attr_args]
-#[derive(Debug)]
+#[derive(AttrArgs, Debug)]
 pub enum HelperAttr {
     Ignore { ignore: bool },
     Alias { alias: Vec<String> },
