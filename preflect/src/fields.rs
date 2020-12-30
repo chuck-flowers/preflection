@@ -22,15 +22,18 @@ pub trait HasFields {
 
 /// Represents a struct that has a field with a specific name and type.
 #[cfg(feature = "has-field")]
-pub trait HasField<T, const NAME: &'static str> {
+pub trait HasField<const NAME: &'static str> {
+    /// The type of the field.
+    type FieldType;
+    
     /// Gets an immutable reference to the field.
-    fn get_field(&self) -> &T;
+    fn get_field(&self) -> &Self::FieldType;
 
     /// Gets a mutable reference to the field.
-    fn get_field_mut(&mut self) -> &mut T;
+    fn get_field_mut(&mut self) -> &mut Self::FieldType;
 
     /// Transforms the struct into an owned value of the field.
-    fn into_field(self) -> T;
+    fn into_field(self) -> Self::FieldType;
 }
 
 /// A trait that provides useful extension methods that make dynamically

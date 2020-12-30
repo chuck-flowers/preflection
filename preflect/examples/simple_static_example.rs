@@ -19,7 +19,7 @@ fn main() {
     println!("After name change: {:?}", user);
 }
 
-fn change_name_to_bob(obj: &mut impl HasField<String, "name">) {
+fn change_name_to_bob(obj: &mut impl HasField<"name", FieldType = String>) {
     let name: &mut String = obj.get_field_mut();
     name.clear();
     name.push_str("Bob");

@@ -22,11 +22,11 @@ fn main() {
     println!("id = {}", id);
 }
 
-fn read_id(has_id: &dyn HasField<u32, "id">) -> &u32 {
+fn read_id(has_id: &dyn HasField<"id", FieldType = u32>) -> &u32 {
     has_id.get_field()
 }
 
 #[allow(dead_code)]
-fn read_name(has_name: &dyn HasField<String, "name">) -> &String {
+fn read_name(has_name: &dyn HasField<"name", FieldType = String>) -> &String {
     has_name.get_field()
 }

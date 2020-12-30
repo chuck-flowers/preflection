@@ -36,16 +36,18 @@ fn field_impl(ty_name: &Ident, field: &Field) -> ItemImpl {
     let field_ident = &field.ident.as_ref().unwrap();
     let field_name = LitStr::new(&field_ident.to_string(), field_ident.span());
     parse_quote! {
-        impl preflect::fields::HasField<#field_ty, #field_name> for #ty_name {
-            fn get_field<'a>(&'a self) -> &'a #field_ty {
+        impl ::preflect::fields::HasField<#field_name> for #ty_name {
+            type FieldType = #field_ty;
+
+            fn get_field<'a>(&'a self) -> &'a Self::FieldType {
                 &self.#field_ident
             }
 
-            fn get_field_mut<'a>(&'a mut self) -> &'a mut #field_ty {
+            fn get_field_mut<'a>(&'a mut self) -> &'a mut Self::FieldType {
                 &mut self.#field_ident
             }
 
-            fn into_field(self) -> #field_ty {
+            fn into_field(self) -> Self::FieldType {
                 self.#field_ident
             }
         }
