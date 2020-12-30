@@ -74,8 +74,13 @@ fn make_match<'a>(
 
     // Build a token stream for each match arm
     let match_arms = fields
-        .map(|field| make_match_arm(field, mut_token))
-        .filter_map(|res| res.ok().flatten());
+        .filter_map(|field| match make_match_arm(field, mut_token) {
+            Ok(Some(arm)) => Some(Ok(arm)),
+            Err(e) => Some(Err(e)),
+            _ => None,
+        })
+        .collect::<Result<Vec<Arm>, _>>()
+        .map_err(<GetHelperAttrError as Into<syn::Error>>::into)?;
 
     let match_statement = parse_quote! {
         match name {

@@ -70,3 +70,11 @@ impl From<ParseError> for GetHelperAttrError {
         Self::ParseError { parse_error }
     }
 }
+
+impl Into<syn::Error> for GetHelperAttrError {
+    fn into(self) -> syn::Error {
+        let span = proc_macro2::Span::call_site();
+        let message = self.to_string();
+        syn::Error::new(span, message)
+    }
+}
