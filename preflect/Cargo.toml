@@ -11,6 +11,7 @@ preflect-macros = { path = "../preflect-macros" }
 
 [features]
 has-field = ["preflect-macros/has-field"]
+partial-drop = ["preflect-macros/partial-drop"]
 
 [[example]]
 name = "simple_dynamic_example"

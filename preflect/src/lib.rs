@@ -3,4 +3,5 @@
 #![warn(clippy::all)]
 #![cfg_attr(feature = "has-field", feature(const_generics))]
 
+pub mod drop;
 pub mod fields;
