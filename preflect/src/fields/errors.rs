@@ -5,7 +5,9 @@ use core::fmt::Result as FmtResult;
 /// An error that occurred while accessing a field through the preflect API.
 #[derive(Debug, Eq, PartialEq)]
 pub enum FieldAccessError {
+    /// A specified field was not found for the type.
     MissingField,
+    /// The type of the field was not of the expected type.
     InvalidType,
 }
 
