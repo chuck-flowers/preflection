@@ -1,5 +1,4 @@
 use preflect::fields::HasFields;
-use preflect::fields::HasFieldsExt;
 
 #[derive(Debug, HasFields)]
 struct User {
@@ -20,7 +19,7 @@ fn main() {
     println!("After name change: {:?}", user);
 }
 
-fn change_name_to_bob(obj: &mut impl HasFieldsExt) {
+fn change_name_to_bob(obj: &mut impl HasFields) {
     let name: &mut String = obj.get_field_mut("name").unwrap();
     name.clear();
     name.push_str("Bob");

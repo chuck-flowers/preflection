@@ -49,7 +49,7 @@ fn impl_has_fields_for_data_struct(
 
     // Builds the match arms for the immutable and mutable version of the get_field method.
     Ok(parse_quote! {
-        impl preflect::fields::HasFields for #struct_ident {
+        impl ::preflect::fields::BaseHasFields for #struct_ident {
             fn get_field_raw<'s>(&'s self, name: &str) -> preflect::fields::FieldAccessResult<&'s dyn core::any::Any> {
                 #reg_match
             }
@@ -128,7 +128,7 @@ mod tests {
         let data_struct = make_data_struct();
         let actual = impl_has_fields_for_data_struct(&struct_ident, &data_struct).unwrap();
         let expected: ItemImpl = parse_quote! {
-            impl preflect::fields::HasFields for User {
+            impl preflect::fields::BaseHasFields for User {
                 fn get_field_raw<'s>(&'s self, name: &str) -> preflect::fields::FieldAccessResult<&'s dyn core::any::Any> {
                     match name {
                         "id" => core::result::Result::Ok(&self.id),

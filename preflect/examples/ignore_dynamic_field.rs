@@ -1,7 +1,6 @@
 use preflect::fields::FieldAccessError;
 use preflect::fields::FieldAccessResult;
 use preflect::fields::HasFields;
-use preflect::fields::HasFieldsExt;
 
 #[derive(HasFields)]
 struct User {
@@ -24,10 +23,10 @@ fn main() {
     assert_eq!(Err(FieldAccessError::MissingField), name_result);
 }
 
-fn read_id(has_id: &impl HasFieldsExt) -> FieldAccessResult<&u32> {
+fn read_id(has_id: &impl HasFields) -> FieldAccessResult<&u32> {
     has_id.get_field("id")
 }
 
-fn read_name(has_name: &impl HasFieldsExt) -> FieldAccessResult<&String> {
+fn read_name(has_name: &impl HasFields) -> FieldAccessResult<&String> {
     has_name.get_field("name")
 }
