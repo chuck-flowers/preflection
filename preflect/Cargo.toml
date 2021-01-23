@@ -19,3 +19,7 @@ name = "simple_static_example"
 
 [[example]]
 name = "ignore_static_field"
+
+[[example]]
+name = "partial_drop"
+required-features = ["partial-drop"]
