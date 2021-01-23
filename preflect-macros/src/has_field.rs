@@ -49,6 +49,7 @@ fn field_impl(ty_name: &Ident, field: &Field) -> ItemImpl {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pretty_assertions::assert_eq;
     use proc_macro2::Span;
 
     #[test]
@@ -58,17 +59,11 @@ mod tests {
 
         let actual = field_impl(&ty_name, &field);
         let expected = parse_quote! {
-            impl preflect::fields::HasField<u32, "id"> for User {
-                fn get_field<'a>(&'a self) -> &'a u32 {
-                    &self.id
-                }
+            impl ::preflect::fields::BaseHasField<"id"> for User {
+                type FieldType = u32;
 
-                fn get_field_mut<'a>(&'a mut self) -> &'a mut u32 {
-                    &mut self.id
-                }
-
-                fn into_field(self) -> u32 {
-                    self.id
+                fn offset() -> usize {
+                    ::preflect::memoffset::offset_of!(User, id)
                 }
             }
         };

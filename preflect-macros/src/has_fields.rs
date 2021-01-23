@@ -112,6 +112,7 @@ fn make_match_arm(
 mod tests {
 
     use super::*;
+    use pretty_assertions::assert_eq;
     use proc_macro2::Span;
     use syn::parse_quote;
     use syn::punctuated::Punctuated;
@@ -128,7 +129,7 @@ mod tests {
         let data_struct = make_data_struct();
         let actual = impl_has_fields_for_data_struct(&struct_ident, &data_struct).unwrap();
         let expected: ItemImpl = parse_quote! {
-            impl preflect::fields::BaseHasFields for User {
+            impl ::preflect::fields::BaseHasFields for User {
                 fn get_field_raw<'s>(&'s self, name: &str) -> preflect::fields::FieldAccessResult<&'s dyn core::any::Any> {
                     match name {
                         "id" => core::result::Result::Ok(&self.id),
